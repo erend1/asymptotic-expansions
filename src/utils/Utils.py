@@ -1,6 +1,8 @@
 import logging
 import os
 import sys
+
+import flask
 import pandas as pd
 from fake_useragent import UserAgent
 import random
@@ -24,7 +26,6 @@ def merge_dicts(*dict_args):
 def convert_input_into_list(*params):
     converted_params = list()
     for param in params:
-
         if param is not None:
             if not isinstance(param, list):
                 if isinstance(param, dict):
@@ -80,6 +81,26 @@ def convert_input_into_str_list(*params, remove_char=""):
                         temp_param.append(item)
         converted_params.append(temp_param)
     return tuple(converted_params)
+
+
+def round_values_in_list(float_list: list, rounding_number: int = 6):
+    norm = len(float_list)
+    try:
+        rounding_number = int(rounding_number)
+    except ValueError:
+        print(f"Object could not converted into integer: {rounding_number}")
+        return float_list
+
+    for index in range(norm):
+        temp_obj = float_list[index]
+        try:
+            temp_obj = float(temp_obj)
+        except ValueError:
+            print(f"Object could not converted into float: {temp_obj}")
+            continue
+        temp_obj = round(temp_obj, rounding_number)
+        float_list[index] = temp_obj
+    return float_list
 
 
 def loading_bar(norm, current_index, print_result=False, percentage=100, percentage_notation="%"):
@@ -188,4 +209,46 @@ def get_optimal_user_agent(browser_name=None, max_count=10, test_url='https://ww
         print("The user agent could not be chosen, please check the test_url or try to specify name of the browser.")
 
     return user_agent
+
+
+def crypto_index_page_params(form):
+    params_dict = {
+        "word": None,
+        "enc_dec": None,
+        "method": None,
+        "matrix_A": None,
+        "vector_b": None
+    }
+    for key in params_dict:
+        if key in form:
+            temp_value = form[key]
+            try:
+                temp_value = str(temp_value).strip().lower()
+            except ValueError:
+                continue
+            if temp_value not in ["", "title", "empty", "none", "nan"]:
+                params_dict[key] = form[key]
+
+    return tuple(params_dict.values())
+
+
+def series_index_page_params(form):
+    params_dict = {
+        "sequence": None,
+        "x": None,
+        "n": None,
+        "rounding": None
+    }
+    for key in params_dict:
+        if key in form:
+            temp_value = form[key]
+            try:
+                temp_value = str(temp_value).strip().lower()
+            except ValueError:
+                continue
+            if temp_value not in ["", "title", "empty", "none", "nan"]:
+                params_dict[key] = form[key]
+
+    return tuple(params_dict.values())
+
 

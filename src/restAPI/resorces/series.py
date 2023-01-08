@@ -39,7 +39,7 @@ def result(sequence_name, x, n, rounding):
 
     all_results = expansion.get_all_results()
     data_frame = all_results["data_frame"].to_html(
-        index=False, justify="center", col_space=250, show_dimensions=True
+        index=False, justify="center", col_space=125, show_dimensions=True
     ).replace("class=\"dataframe\"", "class =\"table table-responsive\"")
     linear_space = list(all_results["iterations"])
     graph_result_y = round_values_in_list(all_results["results"], rounding)

@@ -39,25 +39,25 @@
         </div>
       </div>
         <!-- Title -->
-        <h1 class="display-3 border-bottom mb-5">Asymptotic Expansions Program V0.1</h1>
+        <h3 class="border-bottom mb-5">Asymptotic Expansions V0.1</h3>
          <!-- MAIN FORM -->
         <form method="post">
             <div class="text-center mx-5 mb-4">
                 <div class="container">
                     <div class="row align-items-center">
                         <!-- Sequence -->
-                        <div class="col mb-3" align="center">
+                        <div class="row mb-5" align="center">
                             <h5 class="border-bottom">Choose the asymptotic expansion:</h5>
                             <select class="form-select" name="sequence" aria-label="Default select example">
-                                <option selected>Open this select menu</option>
                                 <option value="exponential">Ei</option>
                             </select>
                         </div>
                         <!-- X -->
-                        <div class="col mb-3" align="center">
+                        <div class="row mb-5" align="center">
                             <h5 class="border-bottom">Provide the evaluation point for the expansion:</h5>
                             <input
                                     type="number"
+                                    step="any"
                                     class="form-control"
                                     id="validationDefault01"
                                     placeholder="10"
@@ -66,7 +66,7 @@
                             />
                         </div>
                         <!-- N -->
-                        <div class="col mb-3" align="center" >
+                        <div class="row mb-5" align="center" >
                             <h5 class="border-bottom">Provide the index for the evaluation of expansion:</h5>
                             <input
                                     type="number"
@@ -78,7 +78,7 @@
                         </div>
 
                         <!-- Round -->
-                        <div class="col mb-3" align="center" >
+                        <div class="row mb-5" align="center" >
                             <h5 class="border-bottom">Round results to provided number of digits:</h5>
                             <input
                                     type="number"

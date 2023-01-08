@@ -53,6 +53,19 @@ class Crypto:
         print(f"---------Array of {first_str} Word-------")
         print(self.encrypted)
 
+    def get_all_params(self):
+        all_params = {
+            "word": str(self.word),
+            "word_norm": int(self.word_norm),
+            "word_arr": np.array(self.word_arr).tolist(),
+            "lock": np.array(self.lock).tolist(),
+            "constant": np.array(self.constant).tolist(),
+            "key": np.array(self.key).tolist(),
+            "transformed_arr": np.array(self.encrypted).tolist(),
+            "word_transformed": str(self.word_encrypted)
+        }
+        return all_params
+
     def _generate_abc(self, language):
         if language is None:
             language = "tr"
@@ -173,7 +186,7 @@ class Crypto:
         if cipher is not None:
             self.generate_cipher(cipher=cipher)
         if not self._status():
-            return None
+            self.generate_cipher()
         self._generate_word_arr()
         self._generate_constant(constant=constant)
         self.encrypted = self.gs(np.matmul(self.lock, self.word_arr)) + self.constant
@@ -203,6 +216,20 @@ class Ciphers(Crypto):
         self.word_norm = len(self.word)
         self.A = self.gs(np.identity(n=self.word_norm, dtype=int))
         self.b = self.gs(np.zeros(self.word_norm, dtype=int))
+
+        self.ciphers_dict = {
+            "caesar": self.caesar,
+            "example1": self.example1,
+            "example2": self.example2,
+
+        }
+
+    def get(self, key: str):
+        try:
+            the_function = self.ciphers_dict[key]
+        except KeyError:
+            return None, None
+        return the_function()
 
     def caesar(self):
         self.A = self.gs(np.identity(n=self.word_norm, dtype=int))

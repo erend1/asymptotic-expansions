@@ -5,8 +5,8 @@ from src.restAPI.resorces import series, sequences, crypto
 
 app = Flask(
     __name__,
-    template_folder="restAPI/build/templates",
-    static_folder="restAPI/build/static"
+    template_folder="src/restAPI/build/templates",
+    static_folder="src/restAPI/build/static"
 )
 
 logger = get_logger()

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Bootstrap 5 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <title>Asymptotic Series</title>
+  </head>
+
+  <body>
+
+    <div class="container-fluid px-0">
+
+      <!-- LIGHT SWITCH -->
+      <div class="d-flex">
+        <div class="form-check form-switch ms-auto mt-3 me-3">
+          <label class="form-check-label ms-3" for="lightSwitch">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="25"
+              height="25"
+              fill="currentColor"
+              class="bi bi-brightness-high"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"
+              />
+            </svg>
+          </label>
+          <input class="form-check-input" type="checkbox" id="lightSwitch" />
+        </div>
+      </div>
+
+      <!-- Title -->
+      <h1 class="display-3 border-bottom mb-5">Asymptotic Expansions Program V0.1</h1>
+
+      <!-- MAIN FORM -->
+      <div class="text-center mx-5 mb-4">
+          <!-- Formulation -->
+          <h4 class="border-bottom mb-5"> Formulation </h4>
+          <p>
+              Our objective function is given as follows, {{formula_1 | safe}}
+              It can be shown that, the above objective function is asymptotically equivalent to the following series,
+              {{formula_2 | safe}}
+              The back-end algorithm provided in this web page, will take the input values, which are
+              \[ x = {{x | safe}}, \qquad n= {{n | safe}}, \] and substitute them into the above expansion.
+              After that, we will obtain numerical result for the expansion given as
+              \[ {{formula_0 | safe}}({{x | safe}}) \sim {{last_iteration | safe}} \]
+          </p>
+          <p>
+              The choice of index \( n \) is so critical for the numerical convergence.
+              We know that, to obtain most accurate numerical result from the expansion, the \( n \) should be chosen
+              as integer part of the evaluation point \(x\).
+              We can confirm these result, by considering following tables,
+              which shows the numerical result at each \(n\) for the expansion and, also from the graphs,
+              which are showing the table's result in a line graph format.
+          </p>
+        <!-- Table -->
+          <h4 class="border-bottom mb-5"> Table </h4>
+        <div class="row justify-content-center">
+            <div class="col-auto">
+                {{data_frame | safe}}
+            </div>
+        </div>
+
+        <!-- Graph Result -->
+        <h4 class="border-bottom mb-5"></h4>
+          <div class="outbox">
+              <div class="container">
+    <canvas id="myChart1" width="1200" height="600"></canvas>
+              </div>
+          </div>
+          <script>
+            var canvas1 = document.getElementById('myChart1');
+            var chart1 = new Chart(canvas1, {
+            type: 'line',
+
+            data: {
+                labels: {{ linear_space | safe }},
+                datasets: [{
+                    label: "Line chart for sweep data",
+                    data: {{ graph_result_y | safe }},
+                    borderColor: "rgba(0,0,255,0.9)",
+                    backgroundColor: "rgba(159,170,174,0.9)",
+                    hoverBackgroundColor: "rgba(232,105,90,0.9)",
+                    hoverBorderColor: "orange",
+                    fill: false
+                }]
+            },
+            options: {
+                legend: {
+                    labels: {
+                        fontColor: "lightblue",
+                        fontSize: 22
+                    }
+                },
+                scales: {
+                    yAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Value of Expansion',
+                            fontColor: "lightblue",
+                            fontSize: 18,
+                        },
+                        ticks: {
+                            fontColor: "green",
+                            fontSize: 18,
+                            stepSize: 1,
+                            beginAtZero: true
+                        }
+                    }],
+                    xAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Iteration',
+                            fontColor: "lightblue",
+                            fontSize: 18,
+                        },
+                        ticks: {
+                            fontColor: "green",
+                            fontSize: 18,
+                            stepSize: 1,
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+            }
+            );
+</script>
+
+        <!-- Graph Error -->
+        <h4 class="border-bottom mb-5"></h4>
+
+          <div class="outbox">
+              <div class="container">
+    <canvas id="myChart2" width="1200" height="600"></canvas>
+  </div>
+          </div>
+          <script>
+        var canvas2 = document.getElementById('myChart2');
+        var chart2 = new Chart(canvas2, {
+            type: 'line',
+
+            data: {
+                labels: {{ linear_space | safe }},
+                datasets: [{
+                    label: 'Asymptotic Expansion Error Analysis',
+                    data: {{ graph_error_y | safe }},
+                    borderColor: "rgba(0,0,255,0.9)",
+                    backgroundColor: "rgba(159,170,174,0.9)",
+                    hoverBackgroundColor: "rgba(232,105,90,0.9)",
+                    hoverBorderColor: "orange",
+                    fill: false
+                }]
+            },
+       options: {
+            legend: {
+                labels: {
+                    fontColor: "lightblue",
+                    fontSize: 22
+                }
+            },
+            scales: {
+                yAxes: [{
+                display: true,
+                scaleLabel: {
+                display: true,
+            labelString: 'Term Differences at Each Iteration',
+            fontColor: "lightblue",
+            fontSize: 18,
+          },
+                    ticks: {
+                        fontColor: "green",
+                        fontSize: 18,
+                        stepSize: 1,
+                        beginAtZero: true,
+                    }
+                }],
+                xAxes: [{
+                display: true,
+                scaleLabel: {
+                display: true,
+            labelString: 'Iteration',
+            fontColor: "lightblue",
+            fontSize: 18,
+          },
+                    ticks: {
+                        fontColor: "green",
+                        fontSize: 18,
+                        stepSize: 1,
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+        }
+       );
+</script>
+          <div align="left">
+          <a type="button" class="btn btn-danger" href="{{ url_for('series.index') }}">Back</a>
+          </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap 5 -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Light Switch -->
+    <script src="{{ url_for('static', filename='js/switch.js') }}"></script>
+    <!-- Math Jax -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+  </body>
+</html>

@@ -40,7 +40,7 @@ class Sequence:
             r"\text{Ei}",
             r"\[ \text{Ei}( x ) = \int \limits _ x ^{\infty} \dfrac{e^{-t}}{t} \text{d}t, \qquad x >0. \]",
             r"\[ \text{Ei}( x ) \sim e^{- x } \sum_{ k = 0 }^{ n - 1 } (-1)^{ k } \dfrac{ k !}{x^{ k + 1}}, "
-            r"\quad \text{ as } x \to \infty .\]",
+            r"\qquad x \to \infty .\]",
         ]
         result = ((-1) ** self.n) * (math.exp(-self.x)) * (math.factorial(self.n) / self.x ** (self.n + 1))
         return result

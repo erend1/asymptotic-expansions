@@ -66,9 +66,9 @@ class Expansion:
 
         data_frame = pd.DataFrame(
             {
-                "iteration": range(self.seq_n0, len(self.results)),
-                "result of expansion": self.results,
-                "error between each iteration": self.error_results
+                r"\( n \)": range(self.seq_n0, len(self.results)),
+                r"\(S_n(x)\)": self.results,
+                r"\(S_{n-1}(x)-S_n(x)\)": self.error_results
             }
         )
 

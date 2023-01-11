@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template, redirect, url_for
 from src.utils.Utils import get_logger
 from src.restAPI.resorces import series, sequences, crypto
 
@@ -16,6 +16,22 @@ api_version = "/api/v1"
 app.register_blueprint(series.series, url_prefix=api_version)
 app.register_blueprint(sequences.sequences, url_prefix=api_version)
 app.register_blueprint(crypto.crypto, url_prefix=api_version)
+
+
+@app.route(
+    rule="/",
+    endpoint="to_index"
+)
+def to_index():
+    return redirect(url_for("index"))
+
+
+@app.route(
+    rule=api_version,
+    endpoint="index"
+)
+def index():
+    return render_template("index.html")
 
 
 def run():

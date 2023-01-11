@@ -23,12 +23,14 @@ class Expansion:
         self._backend_run()
 
     def _backend_run(self):
-        if self.n is not None:
+        try:
             self.n = int(self.n)
             self._error_analysis(analysis=False)
-        else:
+
+        except TypeError:
             self.n = int(self.x)
             self._error_analysis(analysis=True)
+
         return self
 
     def _sum(self, temp_n=None):
@@ -62,27 +64,15 @@ class Expansion:
     def get_value(self):
         return self.results[-1]
 
-    def get_all_results(self):
-
+    def get_data_frame(self):
         data_frame = pd.DataFrame(
             {
-                r"\( n \)": range(self.seq_n0, len(self.results)),
-                r"\(S_n(x)\)": self.results,
-                r"\(S_{n-1}(x)-S_n(x)\)": self.error_results
+                "iter": range(self.seq_n0, len(self.results)),
+                "value": self.results,
+                "error": self.error_results
             }
         )
-
-        all_results = {
-            "data_frame": data_frame,
-            "x": self.x,
-            "n": self.n,
-            "n0": self.seq_n0,
-            "results": self.results,
-            "errors": self.error_results,
-            "iterations": range(self.seq_n0, len(self.results))
-        }
-
-        return all_results
+        return data_frame
 
     def graph(self, file_name="temp.pdf", path=""):
         n_range = range(self.seq_n0, len(self.results))
@@ -108,10 +98,13 @@ class Expansion:
 
 
 if __name__ == "__main__":
-    seq = Sequence()
+    seq = Sequence(sequence_name="logarithmic")
     expan = Expansion(
-        sequence=seq, x=10
+        sequence=seq, x=1037
     )
     print(
         expan.results
+    )
+    print(
+        expan.error_results
     )

@@ -1,0 +1,33 @@
+{% extends "base/main_base.html" %}
+{% block page_title %}My Workshop{% endblock %}
+{% block main_title %}My Workshop{% endblock %}
+{% block in_container_content %}
+<!-- MAIN FORM -->
+<div class="text-center mx-5 mb-4">
+    <div class="row justify-content-center">
+        <!-- Introduction -->
+        <div class="row mb-5" align="center">
+            <h4 class="border-bottom mb-5"> Introduction </h4>
+        </div>
+
+        <!-- Asymptotic Expansions -->
+        <div class="row mb-5" align="center">
+            <h4 class="border-bottom mb-5"> Asymptotic Expansions </h4>
+            <div class="d-grid gap-2 col-2 mx-auto">
+                <a type="button" class="btn btn-primary" href="{{ url_for('series.index') }}">
+                    Asymptotic Expansions
+                </a>
+            </div>
+        </div>
+        <!-- Crypto -->
+        <div class="row mb-5" align="center">
+            <h4 class="border-bottom mb-5"> Crypto </h4>
+            <div class="d-grid gap-2 col-2 mx-auto">
+                <a type="button" class="btn btn-primary" href="{{ url_for('crypto.index') }}">
+                    Crypto
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

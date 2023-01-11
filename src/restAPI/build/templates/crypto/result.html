@@ -1,0 +1,143 @@
+{% extends "base/main_base.html" %}
+{% block page_title %}Crypto{% endblock %}
+{% block main_title %}Crypto V0.2{% endblock %}
+{% block in_container_content %}
+<!-- MAIN FORM -->
+<div class="text-center mx-5 mb-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <!-- Result -->
+                <div class="row mb-5" align="center">
+                    <h4 class="border-bottom mb-5"> Result </h4>
+                    <p>
+                        Operation has been successfully done! Transformed string is given as follows,
+                    </p>
+                    <p>
+                        <span style="font-size: 62px; color: #ED594E " >
+                            {{ word | string }}
+                        </span>
+                        <span style="font-size: 62px " >
+                            \( \to \)
+                        </span>
+                        <span id="word_encrypted" style="font-size: 62px; color: #4EE2EC " >
+                            {{ word_encrypted | string }}
+                        </span>
+                    </p>
+
+                    <div class="d-grid gap-2 col-2 mx-auto">
+                        <input
+                                type="button"
+                                id="copy_button"
+                                class="btn btn-success"
+                                name="copy_button"
+                                onclick="CopyToClipboard('word_encrypted')"
+                                value="Copy">
+                    </div>
+                </div>
+                <!-- Key File -->
+                <div class="row mb-5" align="center">
+                    <h4 class="border-bottom mb-5"> Key File </h4>
+                    <p>
+                        In order to inverse the operation any time, please download the key file:
+                    </p>
+                    <div class="d-grid gap-2 col-2 mx-auto">
+                        <a
+                                type="button"
+                                class="btn btn-primary"
+                                href="{{ url_for('crypto.download', file_name=word_encrypted) }}">
+                            <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    fill="currentColor"
+                                    class="bi bi-download"
+                                    viewBox="0 0 16 16">
+                                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                            </svg>
+                            Download Key File
+                        </a>
+                    </div>
+                </div>
+                <!-- Formulation -->
+                <div class="row mb-5" align="center">
+                    <h4 class="border-bottom mb-5"> Formulation </h4>
+                    <p>
+                        One can examine the details about the general procedure of how exactly the
+                        transformation operation has been handled in back-end of the algorithm. To see the details please click the button,
+                    </p>
+                    <div class="d-grid gap-2 col-4 mx-auto">
+                        <button
+                                  class="btn btn-info"
+                                  type="button"
+                                  data-bs-toggle="collapse"
+                                  data-bs-target="#collapseExample"
+                                  aria-expanded="false"
+                                  aria-controls="collapseExample">
+                              Formulation
+                          </button>
+                    </div>
+                    <div class="collapse" id="collapseExample">
+                        <h4 class="border-bottom mb-5"></h4>
+                        <p>
+                            Each transformation in the back-end algorithm handled by matrices.
+                            Main formula we will be using during the process will always be
+                            \[ Ax + b = y.\] Here, \(A\) is a square matrix ( we will call it "lock" ) with
+                            dimension equal to total number of characters in the objective string. \(x\) is
+                            on the other hand, is a column matrix which corresponding to the objective
+                            string with each character in the string represented by the number in order
+                            of the alphabet. The column matrix \(b\) is just a constant translation in the
+                            process. Lastly, \(y\) is corresponding to the translated string of the objective
+                            string \(x\).
+                        </p>
+                        <p>
+                            First thing we have noticed in the algorithm, is that, we will be always working with
+                            finite fields, since the total number of characters in any alphabet will be finite.
+                            So, the vector space we are going to be working on will have finite field.
+                        </p>
+                        <p>
+                            Another thing that we have noticed in the algorithm will be the inverse operation
+                            of the translation algorithm. The basic formula for inverse translation will be
+                            \[ x = A^{-1}y - b.\] Hence, the matrix \(A\) should have inverse for the reverse operation.
+                            Main back-end algorithm will always check existence of the inverse operation. Otherwise,
+                            decryption will not be possible. We will call \(A^{-1}\) as "key".
+                        </p>
+                        <p>
+                            Finally, let us consider these variables for just this specific case,
+                        </p>
+                        <p>
+                            <span style="font-size: 42px; color: #ED594E " >
+                                {{ word | safe }}
+                            </span>
+                            <span style="font-size: 42px " >
+                                \( \to \)
+                            </span>
+                            <span style="font-size: 42px; color: #4EE2EC " >
+                                {{ word_encrypted | string }}
+                            </span>
+                        </p>
+                        <p>
+                            \begin{align*}
+                                x &= {{ word_arr | safe }}, \\[10 pt]
+                                A &= {{ lock | safe }}, \\[10 pt]
+                                A^{-1} &= {{ key | safe }},  \\[10 pt]
+                                b &= {{ constant | safe }}, \\[10 pt]
+                                y &= {{ encrypted | safe }}. \\[10 pt]
+                            \end{align*}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+
+<!-- Back Button -->
+<div class="d-grid gap-2 d-md-block">
+        <a type="button" class="btn btn-danger" href="{{ url_for('crypto.index') }}">
+            Back
+        </a>
+    </div>
+<!-- copyToClipboard Function -->
+<script src="{{ url_for('static', filename='js/copyToClipboard.js') }}"></script>
+{% endblock %}
+

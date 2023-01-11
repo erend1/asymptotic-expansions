@@ -6,7 +6,9 @@ series = Blueprint("series", __name__, url_prefix="/series")
 
 
 @series.route(
-    "/series", methods=["GET", "POST"], endpoint="index"
+    rule="/series",
+    methods=["GET", "POST"],
+    endpoint="index"
 )
 def index():
     if request.method == "POST":
@@ -18,10 +20,6 @@ def index():
 
         if sequence_name is None:
             sequence_name = "exponential"
-        if rounding is None:
-            rounding = 9
-        if n is None:
-            n = int(x)
 
         return redirect(
             url_for('series.result', sequence_name=sequence_name, x=x, n=n, rounding=rounding)
@@ -31,19 +29,42 @@ def index():
 
 
 @series.route(
-    "/series/result/<sequence_name>/<x>/<n>/<rounding>", endpoint="result"
+    rule="/series/result/<string:sequence_name>/<float:x>/",
+    defaults={'n': None, 'rounding': None},
+    endpoint="result"
 )
-def result(sequence_name, x, n, rounding):
+@series.route(
+    rule="/series/result/<string:sequence_name>/<float:x>/<n>/",
+    defaults={'rounding': None},
+    endpoint="result"
+)
+@series.route(
+    rule="/series/result/<string:sequence_name>/<float:x>/<rounding>/",
+    defaults={'n': None},
+    endpoint="result"
+)
+@series.route(
+    rule="/series/result/<string:sequence_name>/<float:x>/<n>/<rounding>",
+    endpoint="result"
+)
+def result(sequence_name: str, x: float, n=None, rounding=None):
     sequence = Sequence(sequence_name=sequence_name)
     expansion = Expansion(sequence=sequence, x=x, n=n)
 
-    all_results = expansion.get_all_results()
-    data_frame = all_results["data_frame"].to_html(
-        index=False, justify="center", col_space=125, show_dimensions=True
+    mat_jax_mapper = {
+        "iter": r"\( n \)",
+        "value": r"\(S_n(x)\)",
+        "error": r"\(|S_{n+1}(x)-S_n(x)|\)"
+    }
+
+    data_frame = expansion.get_data_frame()
+    linear_space = list(data_frame["iter"])
+    graph_result_y = round_values_in_list(list(data_frame["value"]), rounding)
+    graph_error_y = round_values_in_list(list(data_frame["error"]), rounding)
+    data_frame = data_frame.rename(columns=mat_jax_mapper).to_html(
+        index=False, justify="center", col_space=120, show_dimensions=True
     ).replace("class=\"dataframe\"", "class =\"table table-responsive\"")
-    linear_space = list(all_results["iterations"])
-    graph_result_y = round_values_in_list(all_results["results"], rounding)
-    graph_error_y = round_values_in_list(all_results["errors"], rounding)
+
     formulas = expansion.seq.formulas_mat_jax
 
     return render_template(

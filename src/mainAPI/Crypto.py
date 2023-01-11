@@ -1,74 +1,20 @@
+import json
+import random
 import numpy as np
 import galois as gs
+import array_to_latex as a2l
+from src.utils.Utils import save_key_file_path
 
 
-class Crypto:
-    def __init__(self, language: str = "tr"):
+class ABC:
+    def __init__(self, language: str = None):
         self.abc = {}
         self._generate_abc(language)
         self.inv_abc = {v: k for k, v in self.abc.items()}
-        self.norm = len(self.abc)
-        self.gs = gs.GF(self.norm)
-
-        self.word = None
-        self.word_norm = None
-        self.word_arr = None
-        self.lock = None
-        self.constant = None
-        self.key = None
-        self.encrypted = None
-        self.word_encrypted = None
-
-    def _status(self):
-        condition = bool(
-             self.lock is None or self.key is None
-        )
-        return not condition
-
-    def _print(self, encryption: bool = True):
-        if encryption:
-            first_str = "Encrypted"
-            second_str = "Decrypted"
-        else:
-            first_str = "Decrypted"
-            second_str = "Encrypted"
-
-        print("--------Formula--------")
-        print("Ax + b = y,")
-        print("x = inv(A)*(y - b),")
-        print("where x: decrypted, y: encrypted word, \n"
-              "A: lock, inv(A): key, b: constant")
-        print(f"-------{second_str} Word---------")
-        print(self.word)
-        print(f"-------{first_str} Word---------")
-        print(self.word_encrypted)
-        print("--------Lock---------")
-        print(self.lock)
-        print("--------Key----------")
-        print(self.key)
-        print("-------Constant-------")
-        print(self.constant)
-        print(f"---------Array of {second_str} Word-------")
-        print(self.word_arr)
-        print(f"---------Array of {first_str} Word-------")
-        print(self.encrypted)
-
-    def get_all_params(self):
-        all_params = {
-            "word": str(self.word),
-            "word_norm": int(self.word_norm),
-            "word_arr": np.array(self.word_arr).tolist(),
-            "lock": np.array(self.lock).tolist(),
-            "constant": np.array(self.constant).tolist(),
-            "key": np.array(self.key).tolist(),
-            "transformed_arr": np.array(self.encrypted).tolist(),
-            "word_transformed": str(self.word_encrypted)
-        }
-        return all_params
 
     def _generate_abc(self, language):
         if language is None:
-            language = "tr"
+            language = "eng"
         language = str(language).strip().lower()
         if language == "tr":
             self.abc = {
@@ -100,7 +46,9 @@ class Crypto:
                 "ü": 26,
                 "v": 27,
                 "y": 28,
-                "z": 0
+                "z": 29,
+                "_": 30,
+                ".": 0
             }
         elif language == "eng":
             self.abc = {
@@ -132,8 +80,43 @@ class Crypto:
                 "z": 26,
                 ".": 27,
                 ",": 28,
-                "!": 0
+                "!": 29,
+                "_": 30,
+                "-": 0
             }
+
+
+class Crypto(ABC):
+    def __init__(self, language: str = None):
+        super().__init__(language=language)
+        self.norm = len(self.abc)
+        self.gs = gs.GF(self.norm)
+
+        self.word = None
+        self.word_norm = None
+        self.word_arr = None
+        self.lock = None
+        self.constant = None
+        self.key = None
+        self.encrypted = None
+        self.word_encrypted = None
+
+    def _update_word(self, new_word: str):
+        try:
+            new_word = str(new_word).strip().lower()
+            self.word = new_word
+            if len(self.word) >= len(self.abc):
+                print("It is not recommended to use this crypto "
+                      "technique for a word that has more than total "
+                      "number of characters in the alphabet.")
+                print("Hence, the remaining part of the word will be"
+                      "chopped.")
+                self.word = self.word[0:len(self.abc)]
+            self.word_norm = len(self.word)
+
+        except Exception as err:
+            print(err)
+            return self
 
     def _generate_word_arr(self):
         self.word_arr = []
@@ -141,12 +124,16 @@ class Crypto:
             try:
                 self.word_arr.append(self.abc[char])
             except KeyError:
-                print(f"The char could not be found in the alphabet: {char}")
-                self.word_arr.append(1)
+                temp_char = random.randint(0, len(self.abc))
+                self.word_arr.append(temp_char)
+                print(
+                    f"The char could not be found in the alphabet: {char}.",
+                    f"Hence, instead new char has been chosen: {self.abc[temp_char]}."
+                )
         self.word_arr = self.gs(np.array(self.word_arr))
         return self
 
-    def _generate_word(self):
+    def _re_generate_word(self):
         if self.encrypted is None:
             return self
         word = str()
@@ -161,75 +148,91 @@ class Crypto:
             self.constant = self.gs(constant)
         return self
 
-    def generate_cipher(self, cipher: np.ndarray = None):
-        if len(self.word) >= 29:
-            print("It is not recommended to use this crypto technique for a word that has more than 29 characters.")
-            self.word_norm = len(self.abc)
-        else:
-            self.word_norm = len(self.word)
-
-        if cipher is not None:
-            self.lock = self.gs(cipher)
-        else:
-            self.lock = self.gs.Random((self.word_norm, self.word_norm))
-
-        while np.linalg.matrix_rank(self.lock) < self.word_norm:
-            print("Defined cipher does not have inverse. So, the cipher will be re-defined.")
-            self.lock = self.gs.Random((self.word_norm, self.word_norm))
-
+    def _generate_cipher(self, cipher: np.ndarray):
+        self.lock = self.gs(cipher)
         self.key = self.gs(np.linalg.inv(self.lock))
         return self
 
-    def encryption(self, word: str, cipher: np.ndarray = None, constant: np.ndarray = None):
-        self.word = str(word)
-        self.word_norm = len(word)
-        if cipher is not None:
-            self.generate_cipher(cipher=cipher)
-        if not self._status():
-            self.generate_cipher()
+    def encryption(self, word: str, cipher: np.ndarray, constant: np.ndarray):
+        self._update_word(new_word=word)
+        self._generate_cipher(cipher=cipher)
         self._generate_word_arr()
         self._generate_constant(constant=constant)
         self.encrypted = self.gs(np.matmul(self.lock, self.word_arr)) + self.constant
-        self.word_encrypted = self._generate_word()
-        self._print()
+        self.word_encrypted = self._re_generate_word()
         return self.word_encrypted
 
-    def decryption(self, word: str, cipher: np.ndarray = None, constant: np.ndarray = None):
-        self.word = str(word)
-        self.word_norm = len(word)
-        if cipher is not None:
-            self.generate_cipher(cipher=cipher)
-        if not self._status():
-            return None
+    def decryption(self, word: str, cipher: np.ndarray, constant: np.ndarray):
+        self._update_word(new_word=word)
+        self._generate_cipher(cipher=cipher)
         self._generate_word_arr()
         self._generate_constant(constant=constant)
         self.encrypted = np.matmul(self.key, self.gs((self.word_arr - self.constant)))
-        self.word_encrypted = self._generate_word()
-        self._print(encryption=False)
+        self.word_encrypted = self._re_generate_word()
         return self.word_encrypted
 
+    def save_lock_constant(self, file_name: str = None):
+        if file_name is None:
+            file_name = "temp"
+        content = {
+            "A": np.array(self.lock),
+            "b": np.array(self.constant)
+        }
+        save_key_file_path(file_name=file_name, content=content)
+        return self
 
-class Ciphers(Crypto):
-    def __init__(self, word: str):
-        super().__init__()
+    def get_all_arrays_in_latex(self):
+        arrays_in_latex = {
+            "word_arr": a2l.to_ltx(np.array(self.word_arr), print_out=False),
+            "lock": a2l.to_ltx(np.array(self.lock), print_out=False),
+            "constant": a2l.to_ltx(np.array(self.constant), print_out=False),
+            "key": a2l.to_ltx(np.array(self.key), print_out=False),
+            "encrypted": a2l.to_ltx(np.array(self.encrypted), print_out=False)
+        }
+        return arrays_in_latex
+
+    def get_all_arrays_in_list(self):
+        all_params = {
+            "word_arr": np.array(self.word_arr).tolist(),
+            "lock": np.array(self.lock).tolist(),
+            "constant": np.array(self.constant).tolist(),
+            "key": np.array(self.key).tolist(),
+            "encrypted": np.array(self.encrypted).tolist(),
+        }
+        return all_params
+
+
+class Ciphers(ABC):
+    def __init__(self, word: str, language: str = None):
+        super().__init__(language=language)
         self.word = str(word)
         self.word_norm = len(self.word)
+        self.norm = len(self.abc)
+        self.gs = gs.GF(self.norm)
         self.A = self.gs(np.identity(n=self.word_norm, dtype=int))
         self.b = self.gs(np.zeros(self.word_norm, dtype=int))
 
         self.ciphers_dict = {
+            "random": self.random,
             "caesar": self.caesar,
             "example1": self.example1,
             "example2": self.example2,
-
         }
 
     def get(self, key: str):
         try:
-            the_function = self.ciphers_dict[key]
+            self.ciphers_dict[key]()
         except KeyError:
-            return None, None
-        return the_function()
+            print("Given method does not exists.")
+        return self.A, self.b
+
+    def random(self):
+        self.A = self.gs.Random((self.word_norm, self.word_norm))
+        while np.linalg.matrix_rank(self.A) < self.word_norm:
+            print("Defined cipher does not have inverse. So, the cipher will be re-defined.")
+            self.A = self.gs.Random((self.word_norm, self.word_norm))
+        self.b = self.gs.Random(self.word_norm)
+        return self.A, self.b
 
     def caesar(self):
         self.A = self.gs(np.identity(n=self.word_norm, dtype=int))

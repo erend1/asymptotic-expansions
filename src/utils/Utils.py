@@ -1,11 +1,12 @@
+import json
 import logging
 import os
 import sys
-
-import flask
+import numpy as np
 import pandas as pd
 from fake_useragent import UserAgent
 import random
+import requests
 
 
 def get_logger():
@@ -83,8 +84,10 @@ def convert_input_into_str_list(*params, remove_char=""):
     return tuple(converted_params)
 
 
-def round_values_in_list(float_list: list, rounding_number: int = 6):
+def round_values_in_list(float_list: list, rounding_number: int = None):
     norm = len(float_list)
+    if rounding_number is None:
+        rounding_number = 6
     try:
         rounding_number = int(rounding_number)
     except ValueError:
@@ -213,11 +216,10 @@ def get_optimal_user_agent(browser_name=None, max_count=10, test_url='https://ww
 
 def crypto_index_page_params(form):
     params_dict = {
+        "language": None,
         "word": None,
         "enc_dec": None,
-        "method": None,
-        "matrix_A": None,
-        "vector_b": None
+        "method": None
     }
     for key in params_dict:
         if key in form:
@@ -228,8 +230,39 @@ def crypto_index_page_params(form):
                 continue
             if temp_value not in ["", "title", "empty", "none", "nan"]:
                 params_dict[key] = form[key]
-
     return tuple(params_dict.values())
+
+
+def crypto_index_page_file_reader(files):
+    file_key = "key"
+    all_params = ["A", "b"]
+    crypto_key_dict = dict()
+    error_flag = False
+
+    if file_key not in files:
+        error_flag = 404
+        return crypto_key_dict, error_flag
+    else:
+        try:
+            data = np.load(files[file_key])
+            try:
+                for param in all_params:
+                    if param in data:
+                        array_obj = data[param]
+                        crypto_key_dict[param] = array_obj
+                    else:
+                        error_flag = 434
+                        break
+
+            except Exception as err:
+                print(err)
+                error_flag = 424
+
+        except Exception as err:
+            print(err)
+            error_flag = 414
+
+    return crypto_key_dict, error_flag
 
 
 def series_index_page_params(form):
@@ -252,3 +285,27 @@ def series_index_page_params(form):
     return tuple(params_dict.values())
 
 
+def save_key_file_path(file_name, content: dict,  main_path: str = None):
+    if main_path is None:
+        main_path = path_append_up_to_src_file()
+        main_path = os.path.join(main_path, "src", "output", "keys", "temps")
+    if not os.path.isdir(s=main_path):
+        print(f"Path does not exists: {main_path}")
+        return None
+    candidate_file_path = os.path.join(main_path, file_name)
+    np.savez(candidate_file_path, A=content["A"], b=content["b"])
+    return candidate_file_path
+
+
+def get_key_file_path(file_name: str = None, main_path: str = None):
+    if main_path is None:
+        main_path = path_append_up_to_src_file()
+        main_path = os.path.join(main_path, "src", "output", "keys", "temps")
+    if not os.path.isdir(s=main_path):
+        print(f"Path does not exists: {main_path}")
+        return None
+    candidate_file_path = os.path.join(main_path, file_name)
+    if not os.path.isfile(path=candidate_file_path):
+        print(f"File does not exists: {candidate_file_path}")
+        return None
+    return str(candidate_file_path)

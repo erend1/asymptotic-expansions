@@ -287,8 +287,8 @@ def series_index_page_params(form):
 
 def save_key_file_path(file_name, content: dict,  main_path: str = None):
     if main_path is None:
-        main_path = path_append_up_to_src_file()
-        main_path = os.path.join(main_path, "src", "output", "keys", "temps")
+        main_path = os.getcwd()
+        main_path = os.path.join(main_path, "output", "keys", "temps")
     if not os.path.isdir(s=main_path):
         print(f"Path does not exists: {main_path}")
         return None
@@ -299,8 +299,8 @@ def save_key_file_path(file_name, content: dict,  main_path: str = None):
 
 def get_key_file_path(file_name: str = None, main_path: str = None):
     if main_path is None:
-        main_path = path_append_up_to_src_file()
-        main_path = os.path.join(main_path, "src", "output", "keys", "temps")
+        main_path = os.getcwd()
+        main_path = os.path.join(main_path, "output", "keys", "temps")
     if not os.path.isdir(s=main_path):
         print(f"Path does not exists: {main_path}")
         return None

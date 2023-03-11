@@ -105,11 +105,11 @@ class Semester(Feed):
         )
         try:
             self.id = semester_id(
-                semester_name=semester_data["Semester"]
+                semester_name=self.data["Semester"]
             )
         except KeyError:
             logger.error(
-                "Semester key could not be found."
+                f"Semester key could not be found: {self.data}"
             )
             self.valid_data = False
         else:
@@ -136,10 +136,10 @@ class Program(Feed):
             program_data, db.Program
         )
         try:
-            self.id = program_data["Program Code"]
+            self.id = self.data["Program Code"]
         except KeyError:
             logger.error(
-                "Program Code key could not be found."
+                f"Program Code key could not be found: {self.data}"
             )
             self.valid_data = False
         else:
@@ -166,10 +166,10 @@ class Course(Feed):
             course_data, db.Course
         )
         try:
-            self.id = course_data["Course Code"]
+            self.id = self.data["Course Code"]
         except KeyError:
             logger.error(
-                "Course Code key could not be found."
+                f"Course Code key could not be found: {self.data}"
             )
             self.valid_data = False
         else:
@@ -204,11 +204,11 @@ class Instructor(Feed):
             instructor_data, db.Instructor
         )
         try:
-            self.name = instructor_data["Instructor Name"]
-            self.title = instructor_data["Instructor Title"]
+            self.name = self.data["Instructor Name"]
+            self.title = self.data["Instructor Title"]
         except KeyError:
             logger.error(
-                "Instructor Name or Instructor Title key could not be found."
+                f"Instructor Name or Instructor Title key could not be found: {self.data}"
             )
             self.valid_data = False
         else:
@@ -235,11 +235,11 @@ class Class(Feed):
             class_data, db.Class
         )
         try:
-            self.building = class_data["Classroom Building"]
-            self.room = class_data["Classroom"]
+            self.building = self.data["Classroom Building"]
+            self.room = self.data["Classroom"]
         except KeyError:
             logger.error(
-                "Classroom Building or Classroom key could not be found."
+                f"Classroom Building or Classroom key could not be found: {self.data}"
             )
             self.valid_data = False
         else:
@@ -266,11 +266,11 @@ class Time(Feed):
             time_data, db.Time
         )
         try:
-            self.start = time_data["Start Hour"]
-            self.end = time_data["End Hour"]
+            self.start = self.data["Start Hour"]
+            self.end = self.data["End Hour"]
         except KeyError:
             logger.error(
-                "Start or End Hour key could not be found."
+                f"Start or End Hour key could not be found: {self.data}"
             )
             self.valid_data = False
         else:
@@ -285,7 +285,8 @@ class Time(Feed):
     def _find_doc(self):
         if self.valid_data:
             program_doc = self.doc_cls.objects(
-                Q(start=self.start) & Q(end=self.end)
+                Q(start=self.start) &
+                Q(end=self.end)
             ).first()
             return program_doc
 
@@ -295,44 +296,77 @@ class Day(Feed):
         super().__init__(
             day_data, db.Day
         )
-        self._rename(
-            mapper={
-                "Day": "day"
-            }
-        )
+        try:
+            self.id = self.data["Day"]
+        except KeyError:
+            logger.error(
+                f"Day could not be found: {self.data}"
+            )
+            self.valid_data = False
+        else:
+            self.candidate_obj = self._find_doc()
 
+        if self.candidate_obj is None:
+            self._rename(
+                mapper={
+                    "Day": "day"
+                }
+            )
+
+    def _find_doc(self):
+        if self.valid_data:
+            day_doc = self.doc_cls.objects(
+                Q(id=self.id)
+            ).first()
+            return day_doc
 
 class Schedule(Feed):
     def __init__(self, schedule_data: dict):
         super().__init__(
             schedule_data, db.Schedule
         )
+        self.course_class = None
         self._run_definer(
             function="_define_class",
             defining_obj="Class"
         )
+        self.course_day = None
         self._run_definer(
             function="_define_day",
             defining_obj="Day"
         )
+        self.course_time = None
         self._run_definer(
             function="_define_time",
             defining_obj="Time"
         )
-        self._rename(
-            mapper={
-                "courseDay": "courseDay",
-                "courseTime": "courseTime",
-                "courseClass": "courseClass"
-            }
-        )
+        self.candidate_obj = self._find_doc()
+
+        if self.candidate_obj is None:
+            self._rename(
+                mapper={
+                    "courseDay": "courseDay",
+                    "courseTime": "courseTime",
+                    "courseClass": "courseClass"
+                }
+            )
+
+    def _find_doc(self):
+        if self.valid_data:
+            schedule_doc = self.doc_cls.objects(
+                Q(courseDay=self.course_day) &
+                Q(courseTime=self.course_time) &
+                Q(courseClass=self.course_class)
+            ).first()
+            return schedule_doc
 
     def _define_class(self):
         if self.valid_data:
             class_obj = Class(
                 class_data=self.data
             ).get()
-            self.data["courseClass"] = class_obj
+            self.data["courseClass"] = self.course_class = class_obj
+
         return self
 
     def _define_time(self):
@@ -340,7 +374,7 @@ class Schedule(Feed):
             time_obj = Time(
                 time_data=self.data
             ).get()
-            self.data["courseTime"] = time_obj
+            self.data["courseTime"] = self.course_time = time_obj
         return self
 
     def _define_day(self):
@@ -348,7 +382,7 @@ class Schedule(Feed):
             day_obj = Day(
                 day_data=self.data
             ).get()
-            self.data["courseDay"] = day_obj
+            self.data["courseDay"] = self.course_day = day_obj
         return self
 
 
@@ -367,27 +401,49 @@ class Record(Feed):
             function="_define_course",
             defining_obj="Course"
         )
-        self._run_definer(
-            function="_define_schedule",
-            defining_obj="Schedule"
-        )
-        self._run_definer(
-            function="_define_instructor",
-            defining_obj="Instructor"
-        )
-        self._rename(
-            mapper={
-                "semester": "semester",
-                "course": "course",
-                "Section": "section",
-                "Capacity": "capacity",
-                "Exchange Capacity": "capacityExchange",
-                "Exchange Used Capacity": "capacityExchangeUsed",
-                "Course Status": "status",
-                "schedule": "schedule",
-                "instructor": "instructor",
-            }
-        )
+        try:
+            self.semester = self.data["semester"]
+            self.course = self.data["course"]
+            self.section = self.data["Course Section"]
+        except KeyError:
+            logger.error(
+                f"Semester or Course Code or Section key could not be found: {self.data}"
+            )
+            self.valid_data = False
+        else:
+            self.candidate_obj = self._find_doc()
+
+        if self.candidate_obj is None:
+            self._run_definer(
+                function="_define_schedule",
+                defining_obj="Schedule"
+            )
+            self._run_definer(
+                function="_define_instructor",
+                defining_obj="Instructor"
+            )
+            self._rename(
+                mapper={
+                    "semester": "semester",
+                    "course": "course",
+                    "Course Section": "section",
+                    "Capacity": "capacity",
+                    "Exchange Capacity": "capacityExchange",
+                    "Exchange Used Capacity": "capacityExchangeUsed",
+                    "Course Status": "status",
+                    "schedule": "schedule",
+                    "instructor": "instructor",
+                }
+            )
+
+    def _find_doc(self):
+        if self.valid_data:
+            record_doc = self.doc_cls.objects(
+                Q(semester=self.semester) &
+                Q(course=self.course) &
+                Q(section=self.section)
+            ).first()
+            return record_doc
 
     def _define_semester(self):
         if self.valid_data:
@@ -473,8 +529,7 @@ class Parser:
         path = path or default_path
         try:
             self.data_df = pd.read_excel(
-                io=path+file,
-                engine="openpyxl"
+                io=path+file
             )
             self.load_flag = True
 

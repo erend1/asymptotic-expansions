@@ -1,11 +1,7 @@
-import io
 import math
-import base64
-import numpy as np
 import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
-from src.mainAPI.Sequences import Sequence
+from src.mainAPI.asym.Sequences import Sequence
 
 
 class Expansion:

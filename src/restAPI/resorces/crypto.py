@@ -1,7 +1,5 @@
-import json
-
 from flask import Blueprint, send_file, render_template, url_for, request, redirect
-from src.mainAPI.Crypto import Crypto, Ciphers
+from src.mainAPI.crypto.Crypto import Crypto, Ciphers
 from src.utils.Utils import crypto_index_page_params, crypto_index_page_file_reader, get_key_file_path
 
 

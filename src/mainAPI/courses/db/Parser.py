@@ -316,7 +316,7 @@ class Day(Feed):
     def _find_doc(self):
         if self.valid_data:
             day_doc = self.doc_cls.objects(
-                Q(id=self.id)
+                Q(day=self.id)
             ).first()
             return day_doc
 
@@ -550,7 +550,8 @@ class Parser:
                     Record(
                         data=data
                     ).get()
-
+        return self
 
 if __name__ == "__main__":
+    main_conn.connect()
     Parser().load().parse()

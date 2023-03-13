@@ -93,15 +93,6 @@ class Connector:
         self.online = online
         return self
 
-    def test_connection(self):
-        connection = get_connection(
-            alias=self.alias
-        )
-        if hasattr(connection, "HOST"):
-            connection = getattr(connection, "HOST")
-        print(connection)
-        return connection
-
 
 # Construct a Connector object to be able to use in further functions
 # without defining same object multiple times.
@@ -109,12 +100,5 @@ main_conn = Connector()
 
 
 if __name__ == "__main__":
-    # Connector Test
-    conn = Connector()
-    conn.connect()
-    conn.update_connection(
-        name="opta"
-    )
-    conn.connect()
-    conn.disconnect()
+    pass
 

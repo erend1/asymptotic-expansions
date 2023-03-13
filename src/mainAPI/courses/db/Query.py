@@ -1,6 +1,5 @@
 import time
 from src.utils.Utils import Logger, get_doc_name
-from src.mainAPI.courses.db.Connector import main_conn
 
 
 # Define logger object.

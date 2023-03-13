@@ -5,8 +5,8 @@ from src.restAPI.resorces import series, sequences, crypto, courses
 
 app = Flask(
     __name__,
-    template_folder="src\\restAPI\\build\\templates",
-    static_folder="src\\restAPI\\build\\static"
+    template_folder="src/restAPI/build/templates",
+    static_folder="src/restAPI/build/static"
 )
 
 logger = Logger(__name__).get_logger()

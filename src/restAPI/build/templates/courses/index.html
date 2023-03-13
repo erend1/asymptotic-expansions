@@ -1,6 +1,6 @@
 {% extends "base/main_base.html" %}
-{% block page_title %}Crypto{% endblock %}
-{% block main_title %}Crypto V0.2{% endblock %}
+{% block page_title %}Course{% endblock %}
+{% block main_title %}Course History{% endblock %}
 {% block in_container_content %}
 <!-- MAIN FORM -->
 <form method="post" enctype=multipart/form-data>
@@ -8,88 +8,22 @@
     <div class="text-center mx-5 mb-4">
         <div class="container">
             <div class="row align-items-center">
-                <!-- Language -->
-                <div class="row mb-5" align="center">
-                    <h5 class="border-bottom">Choose the language:</h5>
-                    <select class="form-select" name="language" aria-label="Default select example">
-                        <option value="eng">English (eng)</option>
-                        <option value="tr">Türkçe (tr)</option>
-                    </select>
-                </div>
-                <!-- Word -->
-                <div class="row mb-5" align="center">
-                    <h5 class="border-bottom">Provide the string, which the operation going to be performed:</h5>
-                    <input
-                            type="text"
+                <!-- Course -->
+                <div class="row mb-5">
+                    <h5 class="border-bottom">Provide the course id:</h5>
+                    <label for="course_id">
+                        <input
+                            type="number"
                             step="any"
                             class="form-control"
-                            id="validationDefault01"
-                            placeholder="abc"
-                            name="word"
+                            id="course_id"
+                            placeholder="2360111"
+                            name="course_id"
                             required
-                    />
+                        />
+                    </label>
                 </div>
-                <!-- Encrypt or Decrypt -->
-                <div class="row mb-5" align="center" >
-                    <h5 class="border-bottom">Provide the type of operation:</h5>
-                    <div class="container">
-                        <div class="row align-items-center">
-                            <!-- Encrypt -->
-                            <div class="col mb-2" align="center">
-                                <div class="form-check-inline" >
-                          <input
-                                  class="form-check-input"
-                                  type="radio"
-                                  name="enc_dec"
-                                  id="encrypt"
-                                  value="encrypt"
-                                  checked
-                          />
-                          <label class="form-check-label-inline" for="encrypt">
-                Encrypt
-              </label>
-                      </div>
-                            </div>
-                            <!-- Decrypt -->
-                            <div class="col mb-2" align="center">
-                                <div class="form-check-inline">
-                                    <input
-                                            class="form-check-input"
-                                            type="radio"
-                                            name="enc_dec"
-                                            id="decrypt"
-                                            value="decrypt"
-                                            onclick="ActivateButtonFromRadio('decrypt', 'back')"
-                                    />
-                                    <label class="form-check-label-inline" for="decrypt">Decrypt</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Method -->
-                <div class="row mb-5" align="center">
-                    <h5 class="border-bottom">Choose method for the operation:</h5>
-                    <select class="form-select" name="method" aria-label="Default select example">
-                        <option selected>random</option>
-                        <option value="caesar">caesar</option>
-                        <option value="example1">example1</option>
-                        <option value="example2">example2</option>
-                        <option value="key">key</option>
-                    </select>
-                </div>
-                <!-- Upload Key -->
-                <div class="row mb-5" align="center" >
-                    <h5 class="border-bottom">Provide key for file for decryption:</h5>
-                      <div class="input-group custom-file-button d-md-block">
-                        <input
-                                type="file"
-                                class="custom-file-input"
-                                name="key"
-                                accept=".npz"
-                                id="inputFile">
-                      </div>
-                </div>
+
                 <!-- Run Button -->
                 <div class="row mb-5" align="center" >
                     <div class="d-grid gap-2 d-md-block">
@@ -104,10 +38,10 @@
             </div>
         </div>
     </div>
+
     <!-- Back Button -->
     <div class="d-grid gap-2 d-md-block">
         <a
-                name="back"
                 id="back"
                 type="button"
                 class="btn btn-danger"
@@ -118,6 +52,17 @@
         </a>
     </div>
 </form>
-<!-- ActivateButtonFromRadio Function -->
-<script src="{{ url_for('static', filename='js/activate_button_radio.js') }}"></script>
+<!-- Auto Complete -->
+<script>
+    let data = {{ course_ids | safe }};
+    const auto_complete = new Autocomplete(
+        document.getElementById(
+            'course_id'
+        ), {
+        data: data,
+        maximumItems: 6,
+        highlightTyped: true,
+        highlightClass: 'fw-bold text-primary'
+    });
+</script>
 {% endblock %}

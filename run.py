@@ -1,21 +1,22 @@
 from flask import Flask, render_template, redirect, url_for
-from src.utils.Utils import get_logger
-from src.restAPI.resorces import series, sequences, crypto
+from src.utils.Utils import Logger
+from src.restAPI.resorces import series, sequences, crypto, courses
 
 
 app = Flask(
     __name__,
-    template_folder="src/restAPI/build/templates",
-    static_folder="src/restAPI/build/static"
+    template_folder="src\\restAPI\\build\\templates",
+    static_folder="src\\restAPI\\build\\static"
 )
 
-logger = get_logger()
+logger = Logger(__name__).get_logger()
 
 api_version = "/api/v1"
 
 app.register_blueprint(series.series, url_prefix=api_version)
 app.register_blueprint(sequences.sequences, url_prefix=api_version)
 app.register_blueprint(crypto.crypto, url_prefix=api_version)
+app.register_blueprint(courses.courses, url_prefix=api_version)
 
 
 @app.route(

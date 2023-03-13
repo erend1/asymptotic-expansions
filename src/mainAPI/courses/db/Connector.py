@@ -1,4 +1,4 @@
-from mongoengine import *
+from mongoengine import connect, disconnect, disconnect_all, get_connection
 from src.utils.Utils import Logger
 from src.utils import config
 
@@ -92,6 +92,15 @@ class Connector:
     def set_online(self, online: bool = True):
         self.online = online
         return self
+
+    def test_connection(self):
+        connection = get_connection(
+            alias=self.alias
+        )
+        if hasattr(connection, "HOST"):
+            connection = getattr(connection, "HOST")
+        print(connection)
+        return connection
 
 
 # Construct a Connector object to be able to use in further functions

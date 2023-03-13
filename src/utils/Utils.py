@@ -2,6 +2,8 @@ import json
 import logging
 import os
 import sys
+
+import flask
 import numpy as np
 import pandas as pd
 from fake_useragent import UserAgent
@@ -79,6 +81,7 @@ class Logger:
         return self._define_handlers()
 
     def get_logger(self) -> logging.Logger:
+        self.update_logger_attr(file_name="main.log")
         return self.logger
 
     def get_connector_logger(self):
@@ -89,6 +92,16 @@ class Logger:
     def get_parser_logger(self):
         self._level = logging.INFO
         self.update_logger_attr(file_name="parser.log")
+        return self.get_logger()
+
+    def get_query_logger(self):
+        self._level = logging.INFO
+        self.update_logger_attr(file_name="query.log")
+        return self.get_logger()
+
+    def get_course_logger(self):
+        self._level = logging.INFO
+        self.update_logger_attr(file_name="course.log")
         return self.get_logger()
 
     def get_courses_logger(self):
@@ -131,13 +144,15 @@ def get_src_path(
             break
         iteration += 1
 
-    if isinstance(path, str):
-        if include_src:
-            path = os.path.join(path, "src")
-        if append_src:
-            path += append_src
-        if not os.path.isdir(path):
-            os.makedirs(name=path)
+    if path is None:
+        path = ""
+
+    if include_src:
+        path = os.path.join(path, "src")
+    if append_src:
+        path += append_src
+    if not os.path.isdir(path):
+        os.makedirs(name=path)
 
     return path
 
@@ -467,5 +482,40 @@ def schedule_index(name: str, feature: str):
     else:
         return None
 
+def courses_index_form(form: dict):
+    params_dict = {
+        "course_id": 0,
+    }
+    for key in params_dict:
+        if key in form:
+            temp_value = form[key]
+            try:
+                temp_value = int(temp_value)
+            except ValueError:
+                continue
+            else:
+                params_dict[key] = temp_value
+
+    return tuple(params_dict.values())
+
+def get_doc_name(doc: object) -> str:
+    """
+    The function takes 'Document' class as input, and returns the document name of the object
+    that is stored in the MongoDB. The function could be useful for querying pipelines especially
+    for the join operation, because for join operations it is required to use directly the
+    document name of object in MongoDB.
+
+    :param doc: Any class that is a subclass of mongoengine.document.Document class will be valid.
+    :return: Document name stored in MongoDB
+    :rtype: str
+    """
+    if hasattr(doc, "_meta"):
+        if "collection" in doc._meta:
+            return doc._meta["collection"]
+        else:
+            print("Document name could not be found !")
+    else:
+        print("The class of the input 'doc' object must be MongoEngine Document class or any superclass of it.")
+    return str()
 
 

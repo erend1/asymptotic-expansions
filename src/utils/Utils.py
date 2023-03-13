@@ -89,6 +89,11 @@ class Logger:
         self.update_logger_attr(file_name="connect.log")
         return self.get_logger()
 
+    def get_saver_logger(self):
+        self._level = logging.INFO
+        self.update_logger_attr(file_name="saver.log")
+        return self.get_logger()
+
     def get_parser_logger(self):
         self._level = logging.INFO
         self.update_logger_attr(file_name="parser.log")
@@ -518,4 +523,17 @@ def get_doc_name(doc: object) -> str:
         print("The class of the input 'doc' object must be MongoEngine Document class or any superclass of it.")
     return str()
 
-
+def convert_df_to_html(
+        data: pd.DataFrame,
+        index: bool = True
+) -> str:
+    html_string = data.to_html(
+        index=index,
+        justify="center",
+        col_space=120,
+        show_dimensions=True
+    ).replace(
+        "class=\"dataframe\"",
+        "class =\"table table-striped\""
+    )
+    return html_string

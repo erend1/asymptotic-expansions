@@ -5,7 +5,7 @@ from src.mainAPI.courses.db.Helper import Record
 from src.utils.Utils import Logger, get_src_path
 
 
-default_path = get_src_path("\\data\\")
+default_path = get_src_path("/data/")
 default_file = "SearchResults.xlsx"
 parser_logger = Logger(__name__).get_parser_logger()
 
